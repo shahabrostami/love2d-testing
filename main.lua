@@ -62,6 +62,7 @@ function love.load()
 		list = {},
 		add = function ()
 			enemy = {}
+			enemy.hp = 5
 			enemy.x = love.math.random( 50, window.width - 50 )
 			enemy.y = love.math.random( 50, window.height - 50 )
 			table.insert(enemies.list, enemy)
@@ -111,13 +112,20 @@ function love.update(dt)
 		enemyTimer = 0
 	end
 
-	for k,v in pairs(player.bullets.list) do
-		v.x = v.x + (v.directionx*15)
-		v.y = v.y + (v.directiony*15)
-		if ( (v.x < -10 or v.x > window.width + 10) 
-			or v.y < -10 or v.y > window.height + 10) then
-			table.remove(player.bullets.list, k) 
+	for bk,bv in pairs(player.bullets.list) do
+		bv.x = bv.x + (bv.directionx*3)
+		bv.y = bv.y + (bv.directiony*3)
+		if ( (bv.x < -10 or bv.x > window.width + 10) or ( bv.y < -10 or bv.y > window.height + 10 ) ) then
+			table.remove(player.bullets.list, bk) 
 			player.bullets.count = player.bullets.count - 1
+		end
+
+		for ek,ev in pairs(enemies.list) do
+			if ( (bv.x >= ev.x and bv.x <= (ev.x+10) or ( (bv.x+4)>= ev.x and (bv.x+4) <= (ev.x+10) ) ) and 
+				  (bv.y >= ev.y and bv.y <= (ev.y+10) or ( (bv.y+4) >= ev.y and (bv.y+4) <= (ev.y+10) ) ) )then
+				table.remove(player.bullets.list, bk) 
+				player.bullets.count = player.bullets.count - 1
+			end
 		end
 	end
 end
@@ -135,6 +143,6 @@ function love.draw()
 		love.graphics.rectangle("fill", v.x, v.y, 4, 4)
 	end
 	for k,v in pairs(enemies.list) do
-		love.graphics.rectangle("fill", v.x, v.y, 10, 10)
+		love.graphics.rectangle("fill", v.x, v.y, 15, 15)
 	end
 end
