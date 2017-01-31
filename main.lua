@@ -62,7 +62,7 @@ function love.load()
 		list = {},
 		add = function ()
 			enemy = {}
-			enemy.hp = 5
+			enemy.hp = 20
 			enemy.x = love.math.random( 50, window.width - 50 )
 			enemy.y = love.math.random( 50, window.height - 50 )
 			table.insert(enemies.list, enemy)
@@ -107,30 +107,37 @@ function love.update(dt)
 		bulletTimer = 0
 	end
 
-	if (enemyTimer > 5) then
+	if (enemyTimer > 5 or enemies.count == 0 ) then
 		enemies.add()
 		enemyTimer = 0
+		enemies.count = enemies.count + 1
 	end
 
 	for bk,bv in pairs(player.bullets.list) do
-		bv.x = bv.x + (bv.directionx*3)
-		bv.y = bv.y + (bv.directiony*3)
+		bv.x = bv.x + (bv.directionx*10)
+		bv.y = bv.y + (bv.directiony*10)
 		if ( (bv.x < -10 or bv.x > window.width + 10) or ( bv.y < -10 or bv.y > window.height + 10 ) ) then
 			table.remove(player.bullets.list, bk) 
 			player.bullets.count = player.bullets.count - 1
 		end
 
 		for ek,ev in pairs(enemies.list) do
-			if ( (bv.x >= ev.x and bv.x <= (ev.x+10) or ( (bv.x+4)>= ev.x and (bv.x+4) <= (ev.x+10) ) ) and 
-				  (bv.y >= ev.y and bv.y <= (ev.y+10) or ( (bv.y+4) >= ev.y and (bv.y+4) <= (ev.y+10) ) ) )then
+			if ( (bv.x >= ev.x and bv.x <= (ev.x+15) or ( (bv.x+4)>= ev.x and (bv.x+4) <= (ev.x+15) ) ) and 
+				  (bv.y >= ev.y and bv.y <= (ev.y+15) or ( (bv.y+4) >= ev.y and (bv.y+4) <= (ev.y+15) ) ) )then
 				table.remove(player.bullets.list, bk) 
 				player.bullets.count = player.bullets.count - 1
+				ev.hp = ev.hp - 1
+				if(ev.hp == 0) then
+					enemies.count = enemies.count - 1
+					table.remove(enemies.list, ek)
+				end
 			end
 		end
 	end
 end
 
 function love.draw()
+	love.graphics.setColor(255, 255, 255)
 	love.graphics.print("Player X: " .. player.x, 10, 0)
 	love.graphics.print("Player Y: " .. player.y, 10, 20)
 	love.graphics.print("mouse.x: " .. mouse.x, 10, 60)
@@ -142,7 +149,18 @@ function love.draw()
 	for k,v in pairs(player.bullets.list) do
 		love.graphics.rectangle("fill", v.x, v.y, 4, 4)
 	end
+
 	for k,v in pairs(enemies.list) do
-		love.graphics.rectangle("fill", v.x, v.y, 15, 15)
+		if(v.hp > 9) then
+			love.graphics.rectangle("fill", v.x, v.y, 15, 15)
+		end
+	end
+
+	love.graphics.setColor(255, 0, 0)
+
+	for k,v in pairs(enemies.list) do
+		if(v.hp <= 9) then 
+			love.graphics.rectangle("fill", v.x, v.y, 15, 15)
+		end
 	end
 end
